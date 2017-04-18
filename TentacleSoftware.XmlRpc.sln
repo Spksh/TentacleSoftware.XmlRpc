@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TentacleSoftware.XmlRpc.Core", "TentacleSoftware.XmlRpc.Core\TentacleSoftware.XmlRpc.Core.csproj", "{681EE531-02C0-44B7-958C-07EBDCC3EAD5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TentacleSoftware.XmlRpc.Owin", "TentacleSoftware.XmlRpc.Owin\TentacleSoftware.XmlRpc.Owin.csproj", "{55B2319F-0E53-45ED-9278-13C94E75659D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TentacleSoftware.XmlRpc.Sample.EmptyAspNetWebApp", "TentacleSoftware.XmlRpc.Sample.EmptyAspNetWebApp\TentacleSoftware.XmlRpc.Sample.EmptyAspNetWebApp.csproj", "{4BC9E74E-29E9-4C3E-A14F-B71D42E006FC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{520A08B4-C364-45C2-A859-03BAFADFE789}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TentacleSoftware.XmlRpc.Sample", "TentacleSoftware.XmlRpc.Sample\TentacleSoftware.XmlRpc.Sample.csproj", "{676664EB-09EB-485F-B90C-BF137FD9D6D1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{CD16AC02-904A-4BCE-839D-36580FB8FFB9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TentacleSoftware.XmlRpc.Test", "TentacleSoftware.XmlRpc.Test\TentacleSoftware.XmlRpc.Test.csproj", "{43FBC4EF-0E3C-4281-95BF-1BEB1703540C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{681EE531-02C0-44B7-958C-07EBDCC3EAD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{681EE531-02C0-44B7-958C-07EBDCC3EAD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{681EE531-02C0-44B7-958C-07EBDCC3EAD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{681EE531-02C0-44B7-958C-07EBDCC3EAD5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55B2319F-0E53-45ED-9278-13C94E75659D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55B2319F-0E53-45ED-9278-13C94E75659D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55B2319F-0E53-45ED-9278-13C94E75659D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55B2319F-0E53-45ED-9278-13C94E75659D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BC9E74E-29E9-4C3E-A14F-B71D42E006FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BC9E74E-29E9-4C3E-A14F-B71D42E006FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BC9E74E-29E9-4C3E-A14F-B71D42E006FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BC9E74E-29E9-4C3E-A14F-B71D42E006FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{676664EB-09EB-485F-B90C-BF137FD9D6D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{676664EB-09EB-485F-B90C-BF137FD9D6D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{676664EB-09EB-485F-B90C-BF137FD9D6D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{676664EB-09EB-485F-B90C-BF137FD9D6D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43FBC4EF-0E3C-4281-95BF-1BEB1703540C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43FBC4EF-0E3C-4281-95BF-1BEB1703540C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43FBC4EF-0E3C-4281-95BF-1BEB1703540C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43FBC4EF-0E3C-4281-95BF-1BEB1703540C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4BC9E74E-29E9-4C3E-A14F-B71D42E006FC} = {520A08B4-C364-45C2-A859-03BAFADFE789}
+		{676664EB-09EB-485F-B90C-BF137FD9D6D1} = {520A08B4-C364-45C2-A859-03BAFADFE789}
+		{43FBC4EF-0E3C-4281-95BF-1BEB1703540C} = {CD16AC02-904A-4BCE-839D-36580FB8FFB9}
+	EndGlobalSection
+EndGlobal
