@@ -65,7 +65,12 @@ namespace TentacleSoftware.XmlRpc.Core
 
                 if (method.ReturnType == typeof(void))
                 {
-                    throw new ArgumentException($"Return type '{method.ReturnType}' for {type.Name}.{method.Name} is not valid for XML-RPC");
+                    throw new ArgumentException($"Return type 'void' for {type.Name}.{method.Name} is not valid. XML-RPC methods cannot return void.");
+                }
+
+                if (typeof(Task).IsAssignableFrom(method.ReturnType) && !method.ReturnType.IsGenericType)
+                {
+                    throw new ArgumentException($"Return type '{method.ReturnType}' for {type.Name}.{method.Name} is not valid. XML-RPC methods cannot return void.");
                 }
 
                 XmlRpcMethod xmlRpcMethod = new XmlRpcMethod(instanceFactory, method);
@@ -100,19 +105,28 @@ namespace TentacleSoftware.XmlRpc.Core
                     // Require that the first node be an XmlDeclaration
                     // This will explode anyway if the XML stream is malformed
                     // ...but we want to skip the first XmlDeclaration node, so we'll just consume it silently
-                    throw new InvalidOperationException(); // TODO: Write fault? Or handle in another OWIN module?
+                    throw new InvalidOperationException();
                 }
 
+                // Once we receive a <methodName> element, we check our internal dictionary for a matching MethodInfo
+                // We grab the expected paramter types here so we can compare them with <value> elements as we receive them
+                Type[] parameterTypes = new Type[0];
+                Type currentType = null;
+
+                // We have an expected number of parameters, and each has a specific slot in the parameters array we pass to the method when invoking it
+                // We keep track of which parameter we're building with this
+                int parameterIndex = 0;
+
+                // XML elements are nested, and the same element type (e.g. <value>) can mean different things in different contexts
+                // We use a stack to keep track of this nesting
                 Stack<ElementType> elements = new Stack<ElementType>();
                 ElementType currentElement = ElementType.Root;
 
-                Type[] parameterTypes = new Type[0];
-                int index = 0;
-
-                object currentValue = null;
-
-                Type currentType = null;
+                // XML-RPC supports Arrays and Structs (complex objects) as well as the standard scalar values
+                // Our Arrays could contain Structs and our Structs can have members that are also Structs or Arrays
+                // We use a stack to keep track of this nesting
                 Stack<ValueContext> values = new Stack<ValueContext>();
+                object currentValue = null;
 
                 while (await reader.ReadAsync())
                 {
@@ -194,9 +208,9 @@ namespace TentacleSoftware.XmlRpc.Core
 
                                 // Close out params; do we have enough?
                                 // We always increase our index by 1 at the end of a </param>, so if we have all params our index == parameters.length
-                                if (index != parameters.Length)
+                                if (parameterIndex != parameters.Length)
                                 {
-                                    throw new ArgumentOutOfRangeException($"Received {index} parameters. Expected {parameterTypes.Length} parameters for this methodCall, ");
+                                    throw new ArgumentOutOfRangeException($"Received {parameterIndex} parameters. Expected {parameterTypes.Length} parameters for methodCall {method.DeclaringType}.{method.Name}");
                                 }
                             }
 
@@ -207,9 +221,9 @@ namespace TentacleSoftware.XmlRpc.Core
 
                                 // A new open param tag
                                 // Are we expecting another param for this methodCall?
-                                if (index >= parameters.Length)
+                                if (parameterIndex >= parameters.Length)
                                 {
-                                    throw new ArgumentOutOfRangeException($"Received too many parameters. Expected {parameterTypes.Length} parameters for methodCall.");
+                                    throw new ArgumentOutOfRangeException($"Received too many parameters. Expected {parameterTypes.Length} parameters for methodCall {method.DeclaringType}.{method.Name}");
                                 }
                             }
 
@@ -234,7 +248,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                                 // We use Reflection to create new instances of complex types (e.g. for a Struct or an Array), and to do that we need a Type
                                 // We update this currentType as we progress through the object graph; this is just the root value for this parameter
-                                currentType = parameterTypes[index];
+                                currentType = parameterTypes[parameterIndex];
                             }
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
@@ -257,17 +271,18 @@ namespace TentacleSoftware.XmlRpc.Core
                                 if (currentElement == ElementType.Param)
                                 {
                                     // Make sure it's of the expected type
-                                    if (currentValue.GetType() != parameterTypes[index])
+                                    if (currentValue.GetType() != parameterTypes[parameterIndex])
                                     {
-                                        throw new ArgumentOutOfRangeException($"Parameter of type {currentValue.GetType()} does not match expected type {parameterTypes[index]} at index {index}");
+                                        throw new ArgumentOutOfRangeException($"Parameter of type {currentValue.GetType()} does not match expected type {parameterTypes[parameterIndex]} at index {parameterIndex} for methodCall {method.DeclaringType}.{method.Name}");
                                     }
 
-                                    parameters[index] = currentValue;
-                                    currentValue = null;
+                                    parameters[parameterIndex] = currentValue;
 
                                     // ...and then bump our index
                                     // We compare this to expected parameter array length when we close out </params> later
-                                    index++;
+                                    parameterIndex++;
+
+                                    currentValue = null;
                                 }
                                 // This is a member of a collection, so we'll add it to the collection
                                 else if (currentElement == ElementType.Data)
@@ -288,6 +303,7 @@ namespace TentacleSoftware.XmlRpc.Core
                                     }
 
                                     collection.Add(currentValue);
+
                                     currentValue = null;
                                 }
                                 // This is a property of a struct
@@ -314,7 +330,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType == XmlNodeType.Text)
                             {
-                                // Assume values with no type are strings; this is valid as per XML-RPC spec
+                                // Assume values with no type are strings; this is valid syntax according to the XML-RPC spec
                                 // However, we won't have a child node that contains the value, so we have to extract it here
                                 // currentElement remains ElementType.Value so that, when we loop next and find the end element, we're closing off the value node correctly
                                 currentValue = reader.Value;
@@ -390,8 +406,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new ArgumentOutOfRangeException(
-                                    $"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.Int}, {ElementType.Boolean}, {ElementType.String}, {ElementType.Double}, {ElementType.DateTimeIso8601}, {ElementType.Base64}, {ElementType.Array}, {ElementType.Struct}, or {NodeType.EndElement}");
+                                throw new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.Int}, {ElementType.Boolean}, {ElementType.String}, {ElementType.Double}, {ElementType.DateTimeIso8601}, {ElementType.Base64}, {ElementType.Array}, {ElementType.Struct}, or {NodeType.EndElement}");
                             }
 
                             break;
@@ -517,14 +532,14 @@ namespace TentacleSoftware.XmlRpc.Core
                                 currentElement = elements.Pop();
 
                                 // We've finished building our array, so pop it off the stack
-                                // Closing </param> or </member> will shove this into a method parameter or an object property
+                                // The closing </param> or </member> element will shove this into a method parameter or an object property
                                 ValueContext collection = values.Pop();
 
                                 // Are we expecting a real T[] or a generic collection?
                                 if (collection.Type.IsArray)
                                 {
                                     // We back T[] with List<T> so we can call IList.Add() without throwing fixed size exceptions
-                                    // We'll convert our backing store to a T[]
+                                    // So, we need to convert our backing store to a T[]
                                     IList value = (IList)collection.Value;
 
                                     // Create new array of correct size
@@ -564,7 +579,7 @@ namespace TentacleSoftware.XmlRpc.Core
                                 currentElement = elements.Pop();
 
                                 // We've finished building our struct, so pop it off the stack
-                                // Closing </param> or </member> will shove this into a method parameter or an object property
+                                // The closing </param> or </member> element will shove this into a method parameter or an object property
                                 currentValue = values.Pop().Value;
                             }
 
@@ -594,7 +609,7 @@ namespace TentacleSoftware.XmlRpc.Core
                                 currentElement = ElementType.Value;
 
                                 // We're starting a new <array> member
-                                // What's the expected type for this collection?
+                                // What's the expected member type for this collection?
                                 currentType = values.Peek().CollectedType;
                             }
 
@@ -686,6 +701,13 @@ namespace TentacleSoftware.XmlRpc.Core
                 throw new ArgumentException($"Returned value for {method.DeclaringType}.{method.Name} is null. Expected {method.ReturnType}");
             }
 
+            if (result is Task)
+            {
+                // Must be Task<T> and thus have a return type
+                // We have a guard clause when adding XmlRpcMethods that verifies we have a generic Task, so a check here is not required
+                result = await (dynamic) result;
+            }
+
             using (XmlWriter writer = XmlWriter.Create(output, new XmlWriterSettings { Async = true, Encoding = Encoding.UTF8, Indent = true })) // TODO: Drop indent
             {
                 await writer.WriteStartDocumentAsync();
@@ -723,6 +745,7 @@ namespace TentacleSoftware.XmlRpc.Core
                 await writer.WriteEndElementAsync();
 
                 await writer.WriteEndDocumentAsync();
+                await writer.FlushAsync();
             }
         }
     }

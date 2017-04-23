@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TentacleSoftware.XmlRpc.Core;
 
 namespace TentacleSoftware.XmlRpc.Sample
@@ -25,6 +26,26 @@ namespace TentacleSoftware.XmlRpc.Sample
                     Url = "http://myblog1.com",
                 }
             };
+        }
+
+        [XmlRpcMethod("blogger.getUsersBlogsAsync")]
+        [XmlRpcMethod("metaWeblog.getUsersBlogsAsync")]
+        public Task<List<Blog>> GetUsersBlogsAsync(string appKey, string username, string password)
+        {
+            Console.WriteLine("GetUsersBlogsAsync");
+            Console.WriteLine(" - " + appKey);
+            Console.WriteLine(" - " + username);
+            Console.WriteLine(" - " + password);
+
+            return Task.FromResult(new List<Blog>
+            {
+                new Blog
+                {
+                    BlogId = "1",
+                    BlogName = "My Blog 1",
+                    Url = "http://myblog1.com",
+                }
+            });
         }
 
         [XmlRpcMethod("blogger.getAllBlogs")]

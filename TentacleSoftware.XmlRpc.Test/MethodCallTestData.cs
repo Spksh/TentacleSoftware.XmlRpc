@@ -34,7 +34,8 @@ namespace TentacleSoftware.XmlRpc.Test
                                 <value>Unexpected parameter</value>
                             </param>
                         </params>
-                    </methodCall>");
+                    </methodCall>")
+                    { TestName = "Too Many Params" };
 
                 // Correct params
                 yield return new TestCaseData(
@@ -56,7 +57,31 @@ namespace TentacleSoftware.XmlRpc.Test
                                 </value>
                             </param>
                         </params>
-                    </methodCall>");
+                    </methodCall>")
+                    { TestName = "Correct Params" };
+
+                // Correct params, async
+                yield return new TestCaseData(
+                    @"<?xml version=""1.0"" encoding=""utf-8""?>
+                    <methodCall>
+                        <methodName>blogger.getUsersBlogsAsync</methodName>
+                        <params>
+                            <param>
+                                <value>
+                                    <string>0123456789ABCDEF</string>
+                                </value>
+                            </param>
+                            <param>
+                                <value>user</value>
+                            </param>
+                            <param>
+                                <value>
+                                    <string>P@ssw0rd</string>
+                                </value>
+                            </param>
+                        </params>
+                    </methodCall>")
+                    { TestName = "Correct Params Async" };
 
                 // Empty params, and we're calling a method with no params
                 yield return new TestCaseData(
@@ -65,14 +90,16 @@ namespace TentacleSoftware.XmlRpc.Test
                         <methodName>blogger.getAllBlogs</methodName>
                         <params>
                         </params>
-                    </methodCall>");
+                    </methodCall>")
+                    { TestName = "Empty params" };
 
                 // No params, and we're calling a method with no params
                 yield return new TestCaseData(
                     @"<?xml version=""1.0"" encoding=""utf-8""?>
                     <methodCall>
                         <methodName>blogger.getAllBlogs</methodName>
-                    </methodCall>");
+                    </methodCall>")
+                    { TestName = "No params" };
 
                 // One struct
                 yield return new TestCaseData(
@@ -99,7 +126,8 @@ namespace TentacleSoftware.XmlRpc.Test
                                 </value>
                             </param>
                         </params>
-                    </methodCall>");
+                    </methodCall>")
+                    { TestName = "One struct" };
 
                 // Array of structs with nested structs
                 yield return new TestCaseData(
@@ -181,7 +209,8 @@ namespace TentacleSoftware.XmlRpc.Test
                                 </value>
                             </param>
                         </params>
-                    </methodCall>");
+                    </methodCall>")
+                    { TestName = "Array of nested structs" };
 
                 yield return new TestCaseData(
                     @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -257,7 +286,8 @@ namespace TentacleSoftware.XmlRpc.Test
                                 </value>
                             </param>
                         </params>
-                    </methodCall>");
+                    </methodCall>")
+                    { TestName = "Many structs" };
 
                 // methodResponse, not a methodCall
                 yield return new TestCaseData(
@@ -305,7 +335,8 @@ namespace TentacleSoftware.XmlRpc.Test
                                 </value>    
                             </param>
                         </params>
-                    </methodResponse>");
+                    </methodResponse>")
+                    { TestName = "methodResponse, not a methodCall" };
             }
         }
     }
