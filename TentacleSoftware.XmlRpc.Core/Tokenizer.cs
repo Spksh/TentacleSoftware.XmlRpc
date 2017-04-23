@@ -2,392 +2,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Reflection;
-using System.Xml;
 
 namespace TentacleSoftware.XmlRpc.Core
 {
     public static class Tokenizer
     {
-        public static IEnumerable<Token> Tokenize(this Stream stream)
-        {
-            using (XmlReader reader = XmlReader.Create(stream, new XmlReaderSettings { Async = false }))
-            {
-                if (!reader.Read() || reader.NodeType != XmlNodeType.XmlDeclaration)
-                {
-                    // Require that the first node be an XmlDeclaration
-                    // This will explode anyway if the XML stream is malformed
-                    // ...but we want to skip the first XmlDeclaration node, so we'll just consume it silently
-                    throw new InvalidOperationException();
-                }
-
-                Stack<ElementType> elements = new Stack<ElementType>();
-                ElementType currentElement = ElementType.Root;
-
-                while (reader.Read())
-                {
-                    switch (currentElement)
-                    {
-                        case ElementType.Root:
-
-                            if (reader.NodeType == XmlNodeType.Element && reader.Name == "methodCall")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.MethodCall;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "methodResponse")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.MethodResponse;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType != XmlNodeType.Whitespace)
-                            {
-                                throw new InvalidOperationException();
-                            }
-
-                            break;
-
-                        case ElementType.MethodCall:
-
-                            if (reader.NodeType == XmlNodeType.EndElement)
-                            {
-                                yield return new Token { NodeType = NodeType.EndElement, ElementType = currentElement };
-
-                                currentElement = elements.Pop();
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "methodName")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.MethodName;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "params")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.Params;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType != XmlNodeType.Whitespace)
-                            {
-                                throw new InvalidOperationException();
-                            }
-
-                            break;
-
-                        case ElementType.MethodResponse:
-
-                            if (reader.NodeType == XmlNodeType.EndElement)
-                            {
-                                yield return new Token { NodeType = NodeType.EndElement, ElementType = currentElement };
-
-                                currentElement = elements.Pop();
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "params")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.Params;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType != XmlNodeType.Whitespace)
-                            {
-                                throw new InvalidOperationException();
-                            }
-
-                            break;
-
-                        case ElementType.Params:
-
-                            if (reader.NodeType == XmlNodeType.EndElement)
-                            {
-                                yield return new Token { NodeType = NodeType.EndElement, ElementType = currentElement };
-
-                                currentElement = elements.Pop();
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "param")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.Param;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType != XmlNodeType.Whitespace)
-                            {
-                                throw new InvalidOperationException();
-                            }
-
-                            break;
-
-                        case ElementType.Param:
-
-                            if (reader.NodeType == XmlNodeType.EndElement)
-                            {
-                                yield return new Token { NodeType = NodeType.EndElement, ElementType = currentElement };
-
-                                currentElement = elements.Pop();
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "value")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.Value;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType != XmlNodeType.Whitespace)
-                            {
-                                throw new InvalidOperationException();
-                            }
-
-                            break;
-
-                        case ElementType.Value:
-
-                            if (reader.NodeType == XmlNodeType.EndElement)
-                            {
-                                yield return new Token { NodeType = NodeType.EndElement, ElementType = currentElement };
-
-                                currentElement = elements.Pop();
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Text)
-                            {
-                                // Assume values with no type are strings; this is valid as per XML-RPC spec
-                                // However, we won't have a child node that contains the value, so we have to extract it here and fake it for consistency with the rest of the pipeline
-                                // currentValue remains ElementType.Value so that, when we loop next and find the end element, we're closing off the value node correctly
-                                yield return new Token { ElementType = ElementType.String };
-                                yield return new Token { NodeType = NodeType.Text, ElementType = ElementType.String, Value = reader.Value };
-                                yield return new Token { NodeType = NodeType.EndElement, ElementType = ElementType.String };
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "string")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.String;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "array")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.Array;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "struct")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.Struct;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && (reader.Name == "i4" || reader.Name == "int"))
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.Int;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "boolean")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.Boolean;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "double")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.Double;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "dateTime.iso8601")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.DateTimeIso8601;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "base64")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.Base64;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType != XmlNodeType.Whitespace)
-                            {
-                                throw new InvalidOperationException();
-                            }
-
-                            break;
-
-                        case ElementType.Array:
-
-                            if (reader.NodeType == XmlNodeType.EndElement)
-                            {
-                                yield return new Token { NodeType = NodeType.EndElement, ElementType = currentElement };
-
-                                currentElement = elements.Pop();
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "data")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.Data;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType != XmlNodeType.Whitespace)
-                            {
-                                throw new InvalidOperationException();
-                            }
-
-                            break;
-
-                        case ElementType.Data:
-
-                            if (reader.NodeType == XmlNodeType.EndElement)
-                            {
-                                yield return new Token { NodeType = NodeType.EndElement, ElementType = currentElement };
-
-                                currentElement = elements.Pop();
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "value")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.Value;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType != XmlNodeType.Whitespace)
-                            {
-                                throw new InvalidOperationException();
-                            }
-
-                            break;
-
-                        case ElementType.Struct:
-
-                            if (reader.NodeType == XmlNodeType.EndElement)
-                            {
-                                yield return new Token { NodeType = NodeType.EndElement, ElementType = currentElement };
-
-                                currentElement = elements.Pop();
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "member")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.Member;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType != XmlNodeType.Whitespace)
-                            {
-                                throw new InvalidOperationException();
-                            }
-
-                            break;
-
-                        case ElementType.Member:
-
-                            if (reader.NodeType == XmlNodeType.EndElement)
-                            {
-                                yield return new Token { NodeType = NodeType.EndElement, ElementType = currentElement };
-
-                                currentElement = elements.Pop();
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "name")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.Name;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Element && reader.Name == "value")
-                            {
-                                elements.Push(currentElement);
-                                currentElement = ElementType.Value;
-
-                                yield return new Token { ElementType = currentElement };
-                            }
-
-                            else if (reader.NodeType != XmlNodeType.Whitespace)
-                            {
-                                throw new InvalidOperationException();
-                            }
-
-                            break;
-
-                        case ElementType.Name:
-                        case ElementType.MethodName:
-                        case ElementType.String:
-                        case ElementType.Int:
-                        case ElementType.Boolean:
-                        case ElementType.Double:
-                        case ElementType.DateTimeIso8601:
-                        case ElementType.Base64:
-
-                            if (reader.NodeType == XmlNodeType.EndElement)
-                            {
-                                yield return new Token { NodeType = NodeType.EndElement, ElementType = currentElement };
-
-                                currentElement = elements.Pop();
-                            }
-
-                            else if (reader.NodeType == XmlNodeType.Text)
-                            {
-                                // Text nodes are the end of a branch, and don't have a closing tag
-                                // Therefore, we don't throw them into the stack
-                                yield return new Token { NodeType = NodeType.Text, ElementType = currentElement, Value = reader.Value };
-                            }
-
-                            else if (reader.NodeType != XmlNodeType.Whitespace)
-                            {
-                                throw new InvalidOperationException();
-                            }
-
-                            break;
-                    }
-                }
-            }
-        }
-
         public static IEnumerable<Token> Tokenize(this object target)
         {
+            if (target == null)
+            {
+                yield break;
+            }
+            
             // https://msdn.microsoft.com/en-us/library/ya5y69ds.aspx
             if (target is bool)
             {
@@ -533,6 +160,15 @@ namespace TentacleSoftware.XmlRpc.Core
 
                     if (getMethod != null && property.GetCustomAttribute<XmlRpcIgnoreAttribute>() == null)
                     {
+                        object propertyValue = getMethod.Invoke(target, null);
+
+                        // Don't try to serialize a null value
+                        // We won't include this <member> at all
+                        if (propertyValue == null)
+                        {
+                            continue;
+                        }
+
                         yield return new Token { NodeType = NodeType.Element, ElementType = ElementType.Member };
 
                         XmlRpcMemberAttribute xmlRpcMember = property.GetCustomAttribute<XmlRpcMemberAttribute>();
@@ -543,7 +179,7 @@ namespace TentacleSoftware.XmlRpc.Core
                         yield return new Token { NodeType = NodeType.EndElement, ElementType = ElementType.Name };
 
                         // Wrap value in appropriate tokens
-                        foreach (Token value in Tokenize(getMethod.Invoke(target, null)))
+                        foreach (Token value in Tokenize(propertyValue))
                         {
                             yield return value;
                         }

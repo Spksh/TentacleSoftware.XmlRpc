@@ -2,7 +2,6 @@
 {
     public enum ElementType
     {
-        None,
         Root,
         MethodCall,
         MethodName,

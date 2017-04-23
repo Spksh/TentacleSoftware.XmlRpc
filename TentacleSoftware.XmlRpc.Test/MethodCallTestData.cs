@@ -21,9 +21,6 @@ namespace TentacleSoftware.XmlRpc.Test
                                 </value>
                             </param>
                             <param>
-                                <value>56789</value>
-                            </param>
-                            <param>
                                 <value>
                                     <string>user</string>
                                 </value>
@@ -32,6 +29,9 @@ namespace TentacleSoftware.XmlRpc.Test
                                 <value>
                                     <string>P@ssw0rd</string>
                                 </value>
+                            </param>
+                            <param>
+                                <value>Unexpected parameter</value>
                             </param>
                         </params>
                     </methodCall>");
@@ -48,9 +48,7 @@ namespace TentacleSoftware.XmlRpc.Test
                                 </value>
                             </param>
                             <param>
-                                <value>
-                                    <string>user</string>
-                                </value>
+                                <value>user</value>
                             </param>
                             <param>
                                 <value>

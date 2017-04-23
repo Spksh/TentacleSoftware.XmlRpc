@@ -44,7 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DeserializeFixture.cs" />
+    <Compile Include="ResponseFixture.cs" />
     <Compile Include="MethodCallTestData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

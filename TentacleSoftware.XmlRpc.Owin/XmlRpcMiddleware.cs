@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Owin;
 using TentacleSoftware.XmlRpc.Core;
@@ -12,7 +10,17 @@ namespace TentacleSoftware.XmlRpc.Owin
     {
         public Func<IDictionary<string, object>, Task> Next { get; set; }
 
-        public Dictionary<string, XmlRpcMethod> Methods = new Dictionary<string, XmlRpcMethod>();
+        public XmlRpcRequestHandler Handler { get; set; }
+
+        public XmlRpcMiddleware()
+        {
+            Handler = new XmlRpcRequestHandler();
+        }
+
+        public XmlRpcMiddleware(XmlRpcRequestHandler handler)
+        {
+            Handler = handler;
+        }
 
         /// <summary>
         /// Add XML-RPC responder of type TResponder that will be instantiated for each request.
@@ -39,35 +47,11 @@ namespace TentacleSoftware.XmlRpc.Owin
         /// Add XML-RPC responder factory that will be called for each request.
         /// </summary>
         /// <typeparam name="TResponder"></typeparam>
-        /// <param name="factory"></param>
+        /// <param name="instanceFactory"></param>
         /// <returns></returns>
-        public XmlRpcMiddleware Add<TResponder>(Func<TResponder> factory) where TResponder : class
+        public XmlRpcMiddleware Add<TResponder>(Func<TResponder> instanceFactory) where TResponder : class
         {
-            Type type = typeof(TResponder);
-
-            foreach (MethodInfo method in type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
-            {
-                if (method.GetCustomAttribute<XmlRpcIgnoreAttribute>() != null)
-                {
-                    continue;
-                }
-
-                XmlRpcMethod xmlRpcMethod = new XmlRpcMethod(factory, method);
-
-                List<XmlRpcMethodAttribute> xmlRpcMethodNames = method.GetCustomAttributes<XmlRpcMethodAttribute>().ToList();
-
-                if (xmlRpcMethodNames.Any())
-                {
-                    foreach (XmlRpcMethodAttribute methodName in xmlRpcMethodNames)
-                    {
-                        Methods.Add(methodName.Name, xmlRpcMethod);
-                    }
-                }
-                else
-                {
-                    Methods.Add($"{type.Name}.{method.Name}", xmlRpcMethod);
-                }
-            }
+            Handler.Add(instanceFactory);
 
             return this;
         }
@@ -81,10 +65,13 @@ namespace TentacleSoftware.XmlRpc.Owin
         {
             IOwinContext context = new OwinContext(environment);
 
-            await context.Response.WriteAsync("XML-RPC World");
-
-            // This is the end of the pipeline
-            //await Next(environment);
+            // TODO: Check HTTP verb
+            // TODO: Catch exceptions, respond with failure struct
+            // TODO: HTTP headers, XML content type
+            await Handler.Respond(context.Request.Body, context.Response.Body);
+            
+            // TODO: If we sent a response, this is the end of the pipeline. Do we have other cases where we want to pass through to Next()?
+            // await Next(environment);
         }
     }
 }

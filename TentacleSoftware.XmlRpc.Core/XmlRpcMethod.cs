@@ -13,6 +13,16 @@ namespace TentacleSoftware.XmlRpc.Core
 
         public Type[] ParameterTypes { get; private set; }
 
+        public string Name
+        {
+            get { return _method.Name; }
+        }
+
+        public Type DeclaringType
+        {
+            get { return _method.DeclaringType; }
+        }
+
         public XmlRpcMethod(Func<object> instanceFactory, MethodInfo method)
         {
             _instanceFactory = instanceFactory;

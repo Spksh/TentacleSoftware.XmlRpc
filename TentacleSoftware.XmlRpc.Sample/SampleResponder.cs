@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using TentacleSoftware.XmlRpc.Core;
 
 namespace TentacleSoftware.XmlRpc.Sample
@@ -21,7 +22,7 @@ namespace TentacleSoftware.XmlRpc.Sample
                 {
                     BlogId = "1",
                     BlogName = "My Blog 1",
-                    Url = "http://myblog1.com"
+                    Url = "http://myblog1.com",
                 }
             };
         }
@@ -38,13 +39,39 @@ namespace TentacleSoftware.XmlRpc.Sample
                 {
                     BlogId = "1",
                     BlogName = "My Blog 1",
-                    Url = "http://myblog1.com"
+                    Url = "http://myblog1.com",
+                    Users = new List<User>
+                    {
+                        new User
+                        {
+                            UserId = 1,
+                            Name = "User 1"
+                        },
+                        new User
+                        {
+                            UserId = 2,
+                            Name = "User 2"
+                        }
+                    }
                 },
                 new Blog
                 {
                     BlogId = "2",
                     BlogName = "My Blog 2",
-                    Url = "http://myblog2.com"
+                    Url = "http://myblog2.com",
+                    Users = new List<User>
+                    {
+                        new User
+                        {
+                            UserId = 1,
+                            Name = "User 1"
+                        },
+                        new User
+                        {
+                            UserId = 2,
+                            Name = "User 2"
+                        }
+                    }
                 }
             };
         }
@@ -63,7 +90,7 @@ namespace TentacleSoftware.XmlRpc.Sample
 
         [XmlRpcMethod("blogger.addBlogs")]
         [XmlRpcMethod("metaWeblog.addBlogs")]
-        public void AddBlogs(List<Blog> blogs)
+        public List<string> AddBlogs(List<Blog> blogs)
         {
             Console.WriteLine("AddBlogs");
 
@@ -74,11 +101,13 @@ namespace TentacleSoftware.XmlRpc.Sample
                 Console.WriteLine(" - " + blog.Url);
                 Console.WriteLine();
             }
+
+            return blogs.Select(b => b.BlogId).ToList();
         }
 
         [XmlRpcMethod("blogger.addUsers")]
         [XmlRpcMethod("metaWeblog.addUsers")]
-        public void AddUsers(params User[] users)
+        public List<int> AddUsers(params User[] users)
         {
             Console.WriteLine("AddUsers");
 
@@ -88,6 +117,8 @@ namespace TentacleSoftware.XmlRpc.Sample
                 Console.WriteLine(" - " + user.Name);
                 Console.WriteLine();
             }
+
+            return users.Select(u => u.UserId).ToList();
         }
     }
 }

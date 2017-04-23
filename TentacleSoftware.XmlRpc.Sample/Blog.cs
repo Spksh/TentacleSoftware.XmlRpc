@@ -14,7 +14,7 @@ namespace TentacleSoftware.XmlRpc.Sample
         [XmlRpcMember("blogName")]
         public string BlogName { get; set; }
 
-        [XmlRpcMember("isAdmin")]
+        [XmlRpcIgnore]
         public bool IsAdmin { get; set; }
 
         [XmlRpcMember("xmlrpc")]
