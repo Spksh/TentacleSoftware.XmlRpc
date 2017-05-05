@@ -53,6 +53,9 @@
     <Compile Include="XmlRpcParameterAttribute.cs" />
     <Compile Include="XmlRpcRequestHandler.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="TentacleSoftware.XmlRpc.Core.nuspec" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="TentacleSoftware.XmlRpc.Owin.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TentacleSoftware.XmlRpc.Core\TentacleSoftware.XmlRpc.Core.csproj">
