@@ -104,7 +104,7 @@ namespace TentacleSoftware.XmlRpc.Core
                     // Require that the first node be an XmlDeclaration
                     // This will explode anyway if the XML stream is malformed
                     // ...but we want to skip the first XmlDeclaration node, so we'll just consume it silently
-                    throw new XmlRpcException((int)XmlRpcErrorCode.ParserErrorUnsuportedEncoding, "Unsupported encoding", new InvalidOperationException());
+                    throw new XmlRpcException((int)XmlRpcErrorCode.UnsupportedEncoding, "Unsupported encoding", new InvalidOperationException());
                 }
 
                 // Once we receive a <methodName> element, we check our internal dictionary for a matching MethodInfo
@@ -141,7 +141,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int) XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.MethodCall}"));
+                                throw new XmlRpcException((int) XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.MethodCall}"));
                             }
 
                             break;
@@ -167,7 +167,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.MethodName}, {ElementType.Params} or {NodeType.EndElement}"));
+                                throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.MethodName}, {ElementType.Params} or {NodeType.EndElement}"));
                             }
 
                             break;
@@ -184,7 +184,7 @@ namespace TentacleSoftware.XmlRpc.Core
                                 // Do we have a method bound to this methodName?
                                 if (!Methods.TryGetValue(reader.Value, out method))
                                 {
-                                    throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorRequestedMethodNotFound, "Requested method not found", new ArgumentOutOfRangeException($"MethodName {reader.Value} is unexpected."));
+                                    throw new XmlRpcException((int)XmlRpcErrorCode.RequestedMethodNotFound, "Requested method not found", new ArgumentOutOfRangeException($"MethodName {reader.Value} is unexpected."));
                                 }
 
                                 // No need to pop stack, we'll read the closing </methodName> next anyway
@@ -194,7 +194,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {NodeType.Text} or {NodeType.EndElement}"));
+                                throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {NodeType.Text} or {NodeType.EndElement}"));
                             }
 
                             break;
@@ -209,7 +209,7 @@ namespace TentacleSoftware.XmlRpc.Core
                                 // We always increase our index by 1 at the end of a </param>, so if we have all params our index == parameters.length
                                 if (parameterIndex != parameters.Length)
                                 {
-                                    throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidMethodParameters, "Invalid method parameters", new ArgumentOutOfRangeException($"Received {parameterIndex} parameters. Expected {parameterTypes.Length} parameters for methodCall {method.DeclaringType}.{method.Name}"));
+                                    throw new XmlRpcException((int)XmlRpcErrorCode.InvalidMethodParameters, "Invalid method parameters", new ArgumentOutOfRangeException($"Received {parameterIndex} parameters. Expected {parameterTypes.Length} parameters for methodCall {method.DeclaringType}.{method.Name}"));
                                 }
                             }
 
@@ -222,13 +222,13 @@ namespace TentacleSoftware.XmlRpc.Core
                                 // Are we expecting another param for this methodCall?
                                 if (parameterIndex >= parameters.Length)
                                 {
-                                    throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidMethodParameters, "Too many method parameters", new ArgumentOutOfRangeException($"Received too many parameters. Expected {parameterTypes.Length} parameters for methodCall {method.DeclaringType}.{method.Name}"));
+                                    throw new XmlRpcException((int)XmlRpcErrorCode.InvalidMethodParameters, "Too many method parameters", new ArgumentOutOfRangeException($"Received too many parameters. Expected {parameterTypes.Length} parameters for methodCall {method.DeclaringType}.{method.Name}"));
                                 }
                             }
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.Param} or {NodeType.EndElement}"));
+                                throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.Param} or {NodeType.EndElement}"));
                             }
 
                             break;
@@ -252,7 +252,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.Value} or {NodeType.EndElement}"));
+                                throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.Value} or {NodeType.EndElement}"));
                             }
 
                             break;
@@ -272,7 +272,7 @@ namespace TentacleSoftware.XmlRpc.Core
                                     // Make sure it's of the expected type
                                     if (currentValue.GetType() != parameterTypes[parameterIndex])
                                     {
-                                        throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidMethodParameters, "Invalid method parameter", new ArgumentOutOfRangeException($"Parameter of type {currentValue.GetType()} does not match expected type {parameterTypes[parameterIndex]} at index {parameterIndex} for methodCall {method.DeclaringType}.{method.Name}"));
+                                        throw new XmlRpcException((int)XmlRpcErrorCode.InvalidMethodParameters, "Invalid method parameter", new ArgumentOutOfRangeException($"Parameter of type {currentValue.GetType()} does not match expected type {parameterTypes[parameterIndex]} at index {parameterIndex} for methodCall {method.DeclaringType}.{method.Name}"));
                                     }
 
                                     parameters[parameterIndex] = currentValue;
@@ -292,7 +292,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                                     if (collection == null)
                                     {
-                                        throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInternalXmlRpcError, "Internal XML-RPC error", new ArgumentNullException($"Parameter of type {values.Peek().Value.GetType()} does not implement IList"));
+                                        throw new XmlRpcException((int)XmlRpcErrorCode.InternalXmlRpcError, "Internal XML-RPC error", new ArgumentNullException($"Parameter of type {values.Peek().Value.GetType()} does not implement IList"));
                                     }
 
                                     // We may have an empty collection
@@ -314,7 +314,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                                     if (value.Set == null)
                                     {
-                                        throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInternalXmlRpcError, "Internal XML-RPC error", new ArgumentNullException($"No setter in {values.Peek().Value.GetType()} for {currentValue.GetType()}"));
+                                        throw new XmlRpcException((int)XmlRpcErrorCode.InternalXmlRpcError, "Internal XML-RPC error", new ArgumentNullException($"No setter in {values.Peek().Value.GetType()} for {currentValue.GetType()}"));
                                     }
 
                                     // Set property value
@@ -379,7 +379,7 @@ namespace TentacleSoftware.XmlRpc.Core
                                 // Make sure we've got a class we can cast to IList
                                 if (currentType == null || !typeof(IList).IsAssignableFrom(currentType))
                                 {
-                                    throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInternalXmlRpcError, "Internal XML-RPC error", new ArgumentOutOfRangeException($"Parameter of type {currentType} does not implement IList."));
+                                    throw new XmlRpcException((int)XmlRpcErrorCode.InternalXmlRpcError, "Internal XML-RPC error", new ArgumentOutOfRangeException($"Parameter of type {currentType} does not implement IList."));
                                 }
 
                                 // Create new instance of our collection and add it to the stack
@@ -395,7 +395,7 @@ namespace TentacleSoftware.XmlRpc.Core
                                 // This *will* explode if we're trying to populate a non-generic List and we're using structs
                                 if (currentType == null || currentType == typeof(object))
                                 {
-                                    throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInternalXmlRpcError, "Internal XML-RPC error", new ArgumentOutOfRangeException($"Cannot create instance of Struct from {currentType}. Struct parameters must be strongly-typed."));
+                                    throw new XmlRpcException((int)XmlRpcErrorCode.InternalXmlRpcError, "Internal XML-RPC error", new ArgumentOutOfRangeException($"Cannot create instance of Struct from {currentType}. Struct parameters must be strongly-typed."));
                                 }
 
                                 // Create new instance of our expected object type and add it to the stack
@@ -405,7 +405,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.Int}, {ElementType.Boolean}, {ElementType.String}, {ElementType.Double}, {ElementType.DateTimeIso8601}, {ElementType.Base64}, {ElementType.Array}, {ElementType.Struct}, or {NodeType.EndElement}"));
+                                throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.Int}, {ElementType.Boolean}, {ElementType.String}, {ElementType.Double}, {ElementType.DateTimeIso8601}, {ElementType.Base64}, {ElementType.Array}, {ElementType.Struct}, or {NodeType.EndElement}"));
                             }
 
                             break;
@@ -424,7 +424,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected <{NodeType.Text}, {currentElement}> or {NodeType.EndElement}"));
+                                throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected <{NodeType.Text}, {currentElement}> or {NodeType.EndElement}"));
                             }
 
                             break;
@@ -443,7 +443,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected <{NodeType.Text}, {currentElement}> or {NodeType.EndElement}"));
+                                throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected <{NodeType.Text}, {currentElement}> or {NodeType.EndElement}"));
                             }
 
                             break;
@@ -462,7 +462,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected <{NodeType.Text}, {currentElement}> or {NodeType.EndElement}"));
+                                throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected <{NodeType.Text}, {currentElement}> or {NodeType.EndElement}"));
                             }
 
                             break;
@@ -481,7 +481,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected <{NodeType.Text}, {currentElement}> or {NodeType.EndElement}"));
+                                throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected <{NodeType.Text}, {currentElement}> or {NodeType.EndElement}"));
                             }
 
                             break;
@@ -500,7 +500,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected <{NodeType.Text}, {currentElement}> or {NodeType.EndElement}"));
+                                throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected <{NodeType.Text}, {currentElement}> or {NodeType.EndElement}"));
                             }
 
                             break;
@@ -519,7 +519,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected <{NodeType.Text}, {currentElement}> or {NodeType.EndElement}"));
+                                throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected <{NodeType.Text}, {currentElement}> or {NodeType.EndElement}"));
                             }
 
                             break;
@@ -566,7 +566,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.Data} or {NodeType.EndElement}"));
+                                throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.Data} or {NodeType.EndElement}"));
                             }
 
                             break;
@@ -590,7 +590,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.Member} or {NodeType.EndElement}"));
+                                throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.Member} or {NodeType.EndElement}"));
                             }
 
                             break;
@@ -614,7 +614,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.Value} or {NodeType.EndElement}"));
+                                throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.Value} or {NodeType.EndElement}"));
                             }
 
                             break;
@@ -640,7 +640,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.Name}, {ElementType.Value}  or {NodeType.EndElement}"));
+                                throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.Name}, {ElementType.Value}  or {NodeType.EndElement}"));
                             }
 
                             break;
@@ -658,7 +658,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                                 if (string.IsNullOrWhiteSpace(name))
                                 {
-                                    throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInternalXmlRpcError, "Internal XML-RPC error", new ArgumentOutOfRangeException($"{reader.Name} has no value"));
+                                    throw new XmlRpcException((int)XmlRpcErrorCode.InternalXmlRpcError, "Internal XML-RPC error", new ArgumentOutOfRangeException($"{reader.Name} has no value"));
                                 }
 
                                 ValueContext context = values.Peek();
@@ -666,14 +666,14 @@ namespace TentacleSoftware.XmlRpc.Core
 
                                 if (!context.Properties.TryGetValue(name, out property))
                                 {
-                                    throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInternalXmlRpcError, "Internal XML-RPC error", new ArgumentOutOfRangeException($"{context.Value.GetType()} has no matching public property for '{name}'"));
+                                    throw new XmlRpcException((int)XmlRpcErrorCode.InternalXmlRpcError, "Internal XML-RPC error", new ArgumentOutOfRangeException($"{context.Value.GetType()} has no matching public property for '{name}'"));
                                 }
 
                                 MethodInfo setMethod = property.GetSetMethod();
 
                                 if (setMethod == null)
                                 {
-                                    throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInternalXmlRpcError, "Internal XML-RPC error", new ArgumentOutOfRangeException($"{context.Value.GetType()} has no public setter for property '{name}'"));
+                                    throw new XmlRpcException((int)XmlRpcErrorCode.InternalXmlRpcError, "Internal XML-RPC error", new ArgumentOutOfRangeException($"{context.Value.GetType()} has no public setter for property '{name}'"));
                                 }
 
                                 // Store setter so we can use it later when </value> closes
@@ -685,7 +685,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)
                             {
-                                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected <{NodeType.Text}, {currentElement}> or {NodeType.EndElement}"));
+                                throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected <{NodeType.Text}, {currentElement}> or {NodeType.EndElement}"));
                             }
 
                             break;
@@ -697,7 +697,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
             if (result == null)
             {
-                throw new XmlRpcException((int)XmlRpcErrorCode.ServerErrorInternalXmlRpcError, "Internal XML-RPC error", new ArgumentException($"Returned value for {method.DeclaringType}.{method.Name} is null. Expected {method.ReturnType}"));
+                throw new XmlRpcException((int)XmlRpcErrorCode.InternalXmlRpcError, "Internal XML-RPC error", new ArgumentException($"Returned value for {method.DeclaringType}.{method.Name} is null. Expected {method.ReturnType}"));
             }
 
             if (result is Task)

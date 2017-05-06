@@ -14,13 +14,13 @@
         //-32400 ---> system error
         //-32300 ---> transport error
 
-        ParserErrorNotWellFormed = -32700,
-        ParserErrorUnsuportedEncoding = -32701,
-        ParserErrorInvalidCharacterForEncoding = -32702,
-        ServerErrorInvalidXmlRpc = -32600,
-        ServerErrorRequestedMethodNotFound = -32601,
-        ServerErrorInvalidMethodParameters = -32602,
-        ServerErrorInternalXmlRpcError = -32603,
+        NotWellFormed = -32700,
+        UnsupportedEncoding = -32701,
+        InvalidCharacterForEncoding = -32702,
+        InvalidXmlRpc = -32600,
+        RequestedMethodNotFound = -32601,
+        InvalidMethodParameters = -32602,
+        InternalXmlRpcError = -32603,
         ApplicationError = -32500,
         SystemError = -32400,
         TransportError = 32300
