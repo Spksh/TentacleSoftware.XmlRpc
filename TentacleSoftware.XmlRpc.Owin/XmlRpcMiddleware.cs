@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Owin;
 using TentacleSoftware.XmlRpc.Core;
@@ -10,16 +11,20 @@ namespace TentacleSoftware.XmlRpc.Owin
     {
         public Func<IDictionary<string, object>, Task> Next { get; set; }
 
-        public XmlRpcRequestHandler Handler { get; set; }
+        public XmlRpcRequestHandler RequestHandler { get; set; }
+
+        public XmlRpcResponseHandler ResponseHandler { get; set; }
 
         public XmlRpcMiddleware()
         {
-            Handler = new XmlRpcRequestHandler();
+            RequestHandler = new XmlRpcRequestHandler();
+            ResponseHandler = new XmlRpcResponseHandler();
         }
 
-        public XmlRpcMiddleware(XmlRpcRequestHandler handler)
+        public XmlRpcMiddleware(XmlRpcRequestHandler requestHandler, XmlRpcResponseHandler responseHandler)
         {
-            Handler = handler;
+            RequestHandler = requestHandler;
+            ResponseHandler = responseHandler;
         }
 
         /// <summary>
@@ -51,7 +56,7 @@ namespace TentacleSoftware.XmlRpc.Owin
         /// <returns></returns>
         public XmlRpcMiddleware Add<TResponder>(Func<TResponder> instanceFactory) where TResponder : class
         {
-            Handler.Add(instanceFactory);
+            RequestHandler.Add(instanceFactory);
 
             return this;
         }
@@ -65,13 +70,16 @@ namespace TentacleSoftware.XmlRpc.Owin
         {
             IOwinContext context = new OwinContext(environment);
 
-            // TODO: Check HTTP verb
-            // TODO: Catch exceptions, respond with failure struct
-            // TODO: HTTP headers, XML content type
-            await Handler.Respond(context.Request.Body, context.Response.Body);
-            
-            // TODO: If we sent a response, this is the end of the pipeline. Do we have other cases where we want to pass through to Next()?
-            // await Next(environment);
+            context.Response.StatusCode = (int) HttpStatusCode.OK;
+            context.Response.ContentType = "text/xml";
+
+            await ResponseHandler.RespondWith(
+                await RequestHandler.RespondTo(context.Request.Body), 
+                context.Response.Body
+            );
+
+            // We don't invoke Next() at all because we're the end of the pipeline
+            // However, we still include the public property for Next to conform with OWIN conventions for middleware classes
         }
     }
 }

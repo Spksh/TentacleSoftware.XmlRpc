@@ -16,11 +16,17 @@ namespace TentacleSoftware.XmlRpc.Test
             XmlRpcRequestHandler handler = new XmlRpcRequestHandler()
                 .Add<SampleResponder>();
 
+            XmlRpcResponseHandler responder = new XmlRpcResponseHandler();
+
             using (MemoryStream input = new MemoryStream(Encoding.UTF8.GetBytes(xml)))
             {
                 using (MemoryStream output = new MemoryStream())
                 {
-                    handler.Respond(input, output).Wait();
+                    responder.RespondWith(
+                        handler.RespondTo(input), 
+                        output
+                    )
+                    .Wait();
 
                     output.Position = 0;
 
