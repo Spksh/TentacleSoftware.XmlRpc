@@ -10,4 +10,5 @@ We're not ready for you, yet!
 - ~~Serialize method response and write to response~~
 - ~~Consolidate Tokenizer and method/parameter deserializer (we don't need two state machines)~~
 - ~~Change tokenizer/deserializer to read from stream async (now possible because we won't need to yield return due to consolidation above)~~
-- Return error response as per spec
+- ~~Return error response as per spec~~
+- Add JavaScript XML-RPC demo
