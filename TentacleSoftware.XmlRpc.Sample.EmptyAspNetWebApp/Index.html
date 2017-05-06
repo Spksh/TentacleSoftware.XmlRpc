@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>TentacleSoftware.XmlRpc.Sample.EmptyAspNetWebApp</title>
+	<meta charset="utf-8" />
+</head>
+<body>
+    
+<button id="button-getUsersBlogs">getUsersBlogs</button>
+<button id="button-getUsersBlogsFaulted">getUsersBlogsFaulted</button>
+<button id="button-getUsersBlogsAsync">getUsersBlogsAsync</button>
+<button id="button-getAllBlogs">getAllBlogs</button>
+
+<div>
+    <pre id="container"></pre>
+</div>
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.1/jquery.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-xmlrpc/0.4.3/jquery.xmlrpc.js"></script>
+
+<script type="text/javascript">
+
+    $(document).ready(function() {
+
+        var $container = $('#container');
+
+        $('#button-getUsersBlogs').click(function () {
+            callApi('blogger.getUsersBlogs', ['myAppKey', 'myUserName', 'myPassword']);
+        });
+
+        $('#button-getUsersBlogsFaulted').click(function () {
+            callApi('blogger.getUsersBlogs', ['myAppKey', 'myUserName', 'myPassword', 'oh-no!']);
+        });
+
+        $('#button-getUsersBlogsAsync').click(function () {
+            callApi('blogger.getUsersBlogsAsync', ['myAppKey', 'myUserName', 'myPassword']);
+        });
+
+        $('#button-getAllBlogs').click(function () {
+            callApi('blogger.getAllBlogs', []);
+        });
+
+        function callApi(methodName, params) {
+            $.xmlrpc({
+                url: '/api',
+                methodName: methodName,
+                params: params,
+                success: writeSuccess,
+                error: writeError
+            });
+        }
+
+        function writeSuccess(response, status, jqXHR) {
+            $container.html(JSON.stringify(response, undefined, 2));
+        };
+
+        function writeError(jqXHR, status, error) {
+            $container.html('ERROR: ' + error.code + ' ' + error.message);
+        };
+    });
+
+</script>
+
+</body>
+</html>

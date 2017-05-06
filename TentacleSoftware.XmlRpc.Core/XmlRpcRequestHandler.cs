@@ -99,14 +99,6 @@ namespace TentacleSoftware.XmlRpc.Core
 
             using (XmlReader reader = XmlReader.Create(input, new XmlReaderSettings { Async = true }))
             {
-                if (!await reader.ReadAsync() || reader.NodeType != XmlNodeType.XmlDeclaration)
-                {
-                    // Require that the first node be an XmlDeclaration
-                    // This will explode anyway if the XML stream is malformed
-                    // ...but we want to skip the first XmlDeclaration node, so we'll just consume it silently
-                    throw new XmlRpcException((int)XmlRpcErrorCode.UnsupportedEncoding, "Unsupported encoding", new InvalidOperationException());
-                }
-
                 // Once we receive a <methodName> element, we check our internal dictionary for a matching MethodInfo
                 // We grab the expected paramter types here so we can compare them with <value> elements as we receive them
                 Type[] parameterTypes = new Type[0];
@@ -133,13 +125,23 @@ namespace TentacleSoftware.XmlRpc.Core
                     {
                         case ElementType.Root:
 
+                            if (reader.NodeType == XmlNodeType.XmlDeclaration)
+                            {
+                                // XML-RPC client implementations vary (surprise!)
+                                // Sometimes, we don't get an XML declaration (e.g. <?xml version="1.0" encoding="utf-8"?>) and sometimes we do
+                                // XmlReader will try to guess the encoding if the XML declaration is missing
+                                // We don't really care what the encoding is; theoretically, XmlReader will have thrown an exception on ReadAsync() already
+                                // So, just consume this and move on
+                                continue;
+                            }
+
                             if (reader.NodeType == XmlNodeType.Element && reader.Name == "methodCall")
                             {
                                 elements.Push(currentElement);
                                 currentElement = ElementType.MethodCall;
                             }
 
-                            else if (reader.NodeType != XmlNodeType.Whitespace)
+                            else if (reader.NodeType != XmlNodeType.Whitespace && reader.NodeType != XmlNodeType.XmlDeclaration)
                             {
                                 throw new XmlRpcException((int) XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> is unexpected. Expected {ElementType.MethodCall}"));
                             }

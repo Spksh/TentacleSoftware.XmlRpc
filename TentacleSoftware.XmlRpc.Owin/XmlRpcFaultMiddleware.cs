@@ -55,7 +55,8 @@ namespace TentacleSoftware.XmlRpc.Owin
                 }
 
                 // Dear Global Unhandled Exception Handler, I have a present for you...
-                throw;
+                // TODO: We can't throw, that kills the pipeline (as expected). Add an exception event handler to pass this back up to the logger
+                //throw;
             }
         }
     }

@@ -9,7 +9,7 @@ namespace TentacleSoftware.XmlRpc.Core
     {
         public async Task RespondWith(object response, Stream output)
         {
-            using (XmlWriter writer = XmlWriter.Create(output, new XmlWriterSettings { Async = true, Encoding = Encoding.UTF8, Indent = true })) // TODO: Drop indent
+            using (XmlWriter writer = XmlWriter.Create(output, new XmlWriterSettings { Async = true, Encoding = new UTF8Encoding(/* Do not write BOM to stream */ false), Indent = false }))
             {
                 await writer.WriteStartDocumentAsync();
 
