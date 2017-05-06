@@ -5,16 +5,50 @@
 	<meta charset="utf-8" />
 </head>
 <body>
-    
-<button id="button-getUsersBlogs">getUsersBlogs</button>
-<button id="button-getUsersBlogsFaulted">getUsersBlogsFaulted</button>
-<button id="button-getUsersBlogsAsync">getUsersBlogsAsync</button>
-<button id="button-getAllBlogs">getAllBlogs</button>
 
-<div>
-    <pre id="container"></pre>
-</div>
+<p>
+    <button id="button-getUsersBlogs">getUsersBlogs</button>
+    Pass three parameters, return array of structs
+</p>
+
+<p>
+    <button id="button-getUsersBlogsFaulted">getUsersBlogs</button>
+    Pass 4 parameters when 3 are expected, return fault
+</p>
+
+<p>
+    <button id="button-getUsersBlogsAsync">getUsersBlogsAsync</button>
+    Pass 3 parameters to an async method, return array of structs
+</p>
+
+<p>
+    <button id="button-getAllBlogs">getAllBlogs</button>
+    Call a method with no parameters, return an array of structs
+</p>
+
+<p>
+    <button id="button-addBlog">addBlog</button>
+    Pass struct, return string
+</p>
+
+<p>
+    <button id="button-addBlogs">addBlogs</button>
+    Pass array of structs, return array of strings
+</p>
+
+<p>
+    <button id="button-addUsersX1">addUsers x1</button>
+    Pass one struct to a method with variable number of arguments, return array of strings
+</p>
+
+<p>
+    <button id="button-addUsersX3">addUsers x3</button>
+    Pass three structs to a method with variable number of arguments, return array of strings
+</p>
     
+<pre id="container"></pre>
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.1/jquery.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-xmlrpc/0.4.3/jquery.xmlrpc.js"></script>
 
@@ -24,20 +58,81 @@
 
         var $container = $('#container');
 
-        $('#button-getUsersBlogs').click(function () {
+        $('#button-getUsersBlogs').click(function() {
             callApi('blogger.getUsersBlogs', ['myAppKey', 'myUserName', 'myPassword']);
         });
 
-        $('#button-getUsersBlogsFaulted').click(function () {
+        $('#button-getUsersBlogsFaulted').click(function() {
             callApi('blogger.getUsersBlogs', ['myAppKey', 'myUserName', 'myPassword', 'oh-no!']);
         });
 
-        $('#button-getUsersBlogsAsync').click(function () {
+        $('#button-getUsersBlogsAsync').click(function() {
             callApi('blogger.getUsersBlogsAsync', ['myAppKey', 'myUserName', 'myPassword']);
         });
 
-        $('#button-getAllBlogs').click(function () {
+        $('#button-getAllBlogs').click(function() {
             callApi('blogger.getAllBlogs', []);
+        });
+
+        $('#button-addBlog').click(function() {
+            callApi('blogger.addBlog',
+                [
+                    {
+                        blogid: '1',
+                        blogName: 'My First Blog',
+                        url: 'http://blog1.com'
+                    }
+                ]);
+        });
+
+        $('#button-addBlogs').click(function() {
+            callApi('blogger.addBlogs',
+                [
+                    [
+                        {
+                            blogid: '1',
+                            blogName: 'My First Blog',
+                            url: 'http://blog1.com'
+                        },
+                        {
+                            blogid: '2',
+                            blogName: 'My Second Blog',
+                            url: 'http://blog2.com'
+                        }
+                    ]
+                ]);
+        });
+
+        $('#button-addUsersX1').click(function() {
+            callApi('blogger.addUsers',
+                [
+                    [
+                        {
+                            userId: 1,
+                            name: 'User 1'
+                        }
+                    ]
+                ]);
+        });
+
+        $('#button-addUsersX3').click(function() {
+            callApi('blogger.addUsers',
+                [
+                    [
+                        {
+                            userId: 1,
+                            name: 'User 1'
+                        },
+                        {
+                            userId: 2,
+                            name: 'User 2'
+                        },
+                        {
+                            userId: 3,
+                            name: 'User 3'
+                        }
+                    ]
+                ]);
         });
 
         function callApi(methodName, params) {
