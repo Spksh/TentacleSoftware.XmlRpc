@@ -7,7 +7,11 @@ using Microsoft.Owin;
 
 namespace TentacleSoftware.XmlRpc.Owin
 {
-    public class HttpPostFilterMiddleware
+    /// <summary>
+    /// Make sure we only accept POSTs and text/xml, as per XML-RPC spec.
+    /// This is a separate middleware because, depending on how conformant your clients are, you might want to do more or less filtering.
+    /// </summary>
+    public class XmlRpcRequestFilterMiddleware
     {
         public Func<IDictionary<string, object>, Task> Next { get; set; }
 
@@ -24,6 +28,14 @@ namespace TentacleSoftware.XmlRpc.Owin
             {
                 context.Response.StatusCode = (int) HttpStatusCode.MethodNotAllowed;
                 context.Response.ReasonPhrase = "Method not allowed";
+
+                return;
+            }
+
+            if (context.Request.ContentType != "text/xml")
+            {
+                context.Response.StatusCode = (int) HttpStatusCode.UnsupportedMediaType;
+                context.Response.ReasonPhrase = "Unsupported Media Type";
 
                 return;
             }

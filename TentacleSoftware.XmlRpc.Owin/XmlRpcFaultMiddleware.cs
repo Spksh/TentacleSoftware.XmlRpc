@@ -7,11 +7,22 @@ using TentacleSoftware.XmlRpc.Core;
 
 namespace TentacleSoftware.XmlRpc.Owin
 {
+    /// <summary>
+    ///  Handle any unhandled exceptions in the pipeline by responding with an appropriate XML-RPC fault struct, as per XML-RPC spec.
+    ///  This middleware swallows exceptions unless you subscribe to its Faulted event.
+    ///  If your XML-RPC handler throws XmlRpcExceptions, we'll transform those into fault a struct with the specified FaultCode and FaultString.
+    ///  If your XML-RPC handler throws other exceptions, we'll respond with a fault struct of { FaultCode = 500, FaultString = "Internal Server Error" }.
+    /// </summary>
     public class XmlRpcFaultMiddleware
     {
         public Func<IDictionary<string, object>, Task> Next { get; set; }
 
         public XmlRpcResponseHandler ResponseHandler { get; set; }
+
+        /// <summary>
+        /// This event is raised after we've handled the exception and responded to the client with an acceptable XML-RPC fault struct.
+        /// </summary>
+        public EventHandler<Exception> Faulted;
 
         public XmlRpcFaultMiddleware()
         {
@@ -55,8 +66,24 @@ namespace TentacleSoftware.XmlRpc.Owin
                 }
 
                 // Dear Global Unhandled Exception Handler, I have a present for you...
-                // TODO: We can't throw, that kills the pipeline (as expected). Add an exception event handler to pass this back up to the logger
-                //throw;
+                OnFaulted(error);
+            }
+        }
+
+        public XmlRpcFaultMiddleware OnFaulted(EventHandler<Exception> onFaulted)
+        {
+            Faulted += onFaulted;
+
+            return this;
+        }
+
+        protected virtual void OnFaulted(Exception error)
+        {
+            EventHandler<Exception> faulted = Faulted;
+
+            if (faulted != null)
+            {
+                faulted(this, error);
             }
         }
     }
