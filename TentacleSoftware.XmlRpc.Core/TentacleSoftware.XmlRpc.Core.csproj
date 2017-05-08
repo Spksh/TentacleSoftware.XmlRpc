@@ -43,8 +43,6 @@
     <Compile Include="ElementType.cs" />
     <Compile Include="NodeType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Token.cs" />
-    <Compile Include="Tokenizer.cs" />
     <Compile Include="ValueContext.cs" />
     <Compile Include="XmlRpcErrorCode.cs" />
     <Compile Include="XmlRpcException.cs" />
@@ -56,9 +54,6 @@
     <Compile Include="XmlRpcParameterAttribute.cs" />
     <Compile Include="XmlRpcRequestHandler.cs" />
     <Compile Include="XmlRpcResponseHandler.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="TentacleSoftware.XmlRpc.Core.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -13,4 +13,5 @@ We're not ready for you, yet!
 - ~~Return error response as per spec~~
 - ~~Add JavaScript XML-RPC demo~~
 - ~~Provide extension point in XmlRpcFaultMiddleware to surface Exceptions for the rest of the application to consume (e.g. a logger)~~
-- Consolidate response Tokenizer into XmlRpcResponseHandler
+- ~~Consolidate response Tokenizer into XmlRpcResponseHandler~~
+- Write a relevant and helpful README.md

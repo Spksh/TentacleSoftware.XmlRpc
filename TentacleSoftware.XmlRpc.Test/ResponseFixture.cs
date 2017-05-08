@@ -23,7 +23,7 @@ namespace TentacleSoftware.XmlRpc.Test
                 using (MemoryStream output = new MemoryStream())
                 {
                     responder.RespondWith(
-                        handler.RespondTo(input), 
+                        handler.RespondTo(input).Result, 
                         output
                     )
                     .Wait();
