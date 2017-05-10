@@ -51,7 +51,6 @@
     <Compile Include="XmlRpcMemberAttribute.cs" />
     <Compile Include="XmlRpcMethod.cs" />
     <Compile Include="XmlRpcMethodAttribute.cs" />
-    <Compile Include="XmlRpcParameterAttribute.cs" />
     <Compile Include="XmlRpcRequestHandler.cs" />
     <Compile Include="XmlRpcResponseHandler.cs" />
   </ItemGroup>
