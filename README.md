@@ -4,6 +4,11 @@
 
 http://xmlrpc.scripting.com/spec.html
 
+## Package
+
+- https://www.nuget.org/packages/TentacleSoftware.XmlRpc.Owin
+- `Install-Package TentacleSoftware.XmlRpc.Owin -Pre`
+
 ## Usage
 
 Define your XML-RPC responder in a simple class and decorate its methods.
