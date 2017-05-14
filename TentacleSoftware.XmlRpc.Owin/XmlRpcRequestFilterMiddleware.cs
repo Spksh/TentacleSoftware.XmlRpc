@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.Owin;
 
@@ -26,15 +27,15 @@ namespace TentacleSoftware.XmlRpc.Owin
 
             if (context.Request.Method != HttpMethod.Post.Method)
             {
-                context.Response.StatusCode = (int) HttpStatusCode.MethodNotAllowed;
+                context.Response.StatusCode = (int)HttpStatusCode.MethodNotAllowed;
                 context.Response.ReasonPhrase = "Method not allowed";
 
                 return;
             }
 
-            if (context.Request.ContentType != "text/xml")
+            if (new ContentType(context.Request.ContentType).MediaType != MediaTypeNames.Text.Xml)
             {
-                context.Response.StatusCode = (int) HttpStatusCode.UnsupportedMediaType;
+                context.Response.StatusCode = (int)HttpStatusCode.UnsupportedMediaType;
                 context.Response.ReasonPhrase = "Unsupported Media Type";
 
                 return;
