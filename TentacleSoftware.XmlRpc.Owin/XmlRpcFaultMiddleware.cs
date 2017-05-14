@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Owin;
@@ -53,10 +54,12 @@ namespace TentacleSoftware.XmlRpc.Owin
                 context.Response.StatusCode = (int)HttpStatusCode.OK;
                 context.Response.ContentType = "text/xml";
 
-                XmlRpcException xmlRpcException = error as XmlRpcException;
+                // Enumerate InnerExceptions and AggregateExceptions to see if we've thrown an XmlRpcException anywhere
+                XmlRpcException xmlRpcException = error.Enumerate().FirstOrDefault(e => e is XmlRpcException) as XmlRpcException;
 
                 if (xmlRpcException != null)
                 {
+                    // Use the fault code and message for our <fault> struct
                     await ResponseHandler.RespondWith(new XmlRpcFault { FaultCode = xmlRpcException.Code, FaultString = xmlRpcException.Message }, context.Response.Body);
                 }
                 else
