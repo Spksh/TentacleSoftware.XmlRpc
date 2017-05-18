@@ -440,7 +440,18 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType == XmlNodeType.Text)
                             {
-                                currentValue = Convert.ToBoolean(reader.Value);
+                                if (reader.Value.Equals("1") || reader.Value.Equals("true", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    currentValue = true;
+                                }
+                                else if (reader.Value.Equals("0") || reader.Value.Equals("false", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    currentValue = false;
+                                }
+                                else
+                                {
+                                    throw new XmlRpcException((int)XmlRpcErrorCode.InvalidXmlRpc, "Invalid XML-RPC request", new ArgumentOutOfRangeException($"<{reader.NodeType}, {reader.Name}> value {reader.Value} is unexpected. Expected one of '1', '0', 'true', 'false'"));
+                                }
                             }
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)

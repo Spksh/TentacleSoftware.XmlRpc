@@ -63,7 +63,8 @@ namespace TentacleSoftware.XmlRpc.Core
             // https://msdn.microsoft.com/en-us/library/ya5y69ds.aspx
             if (target is bool)
             {
-                writer.WriteXmlRpcValue("boolean", Convert.ToString(target));
+                // Convert booleans to "1" or "0"
+                writer.WriteXmlRpcValue("boolean", (bool)target ? "1" : "0");
             }
             else if (target is byte)
             {
