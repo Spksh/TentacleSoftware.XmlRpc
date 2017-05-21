@@ -508,7 +508,7 @@ namespace TentacleSoftware.XmlRpc.Core
 
                             else if (reader.NodeType == XmlNodeType.Text)
                             {
-                                currentValue = DateTime.ParseExact(reader.Value, "s", CultureInfo.InvariantCulture);
+                                currentValue = DateTime.ParseExact(reader.Value, "yyyyMMdd'T'HH':'mm':'ss", CultureInfo.InvariantCulture);
                             }
 
                             else if (reader.NodeType != XmlNodeType.Whitespace)

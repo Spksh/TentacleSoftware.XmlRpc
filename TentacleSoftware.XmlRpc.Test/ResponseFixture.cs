@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using NUnit.Framework;
@@ -36,6 +37,20 @@ namespace TentacleSoftware.XmlRpc.Test
                     }
                 }
             }
+        }
+
+        [Test, TestCaseSource(typeof(DateParseTestData), nameof(DateParseTestData.TestCases))]
+        public void DateParse(string input, DateTime output)
+        {
+            const string iso8601 = "yyyyMMdd'T'HH':'mm':'ss";
+
+            DateTime deserialized = DateTime.ParseExact(input, iso8601, CultureInfo.InvariantCulture);
+
+            Assert.AreEqual(deserialized, output);
+
+            string serialized = deserialized.ToString(iso8601, CultureInfo.InvariantCulture);
+
+            Assert.AreEqual(serialized, input);
         }
     }
 }

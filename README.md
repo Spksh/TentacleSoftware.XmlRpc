@@ -109,6 +109,17 @@ The `Add(...)` method has three overloads:
 
 You can decorate a method with `XmlRpcIgnoreAttribute` if you want `XmlRpcMiddleware` to ignore it when populating its `Dictionary` of available methods.
 
+## DateTime
+
+XML-RPC expects DateTime values formatted as ISO 8601. There is some confusion as to how strict this format should be as the example provided in the XML-RPC spec is somewhat unclear.
+
+We've chosen to support the ISO 8601 format as specified exactly by the XML-RPC specification. The format string we use is `"yyyyMMdd'T'HH':'mm':'ss"`, e.g. `"20170531T05:06:00"`.
+
+Additionally, time zones are not supported as per the specification:
+
+> What timezone should be assumed for the dateTime.iso8601 type? UTC? localtime? 
+> Don't assume a timezone. It should be specified by the server in its documentation what assumptions it makes about timezones. 
+
 ## Structs
 
 Serialization and deserialization of `<struct>`s is performed using reflection of the public properties of the specific class.

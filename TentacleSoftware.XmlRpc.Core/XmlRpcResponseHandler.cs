@@ -131,7 +131,7 @@ namespace TentacleSoftware.XmlRpc.Core
             }
             else if (target is DateTime)
             {
-                writer.WriteXmlRpcValue("dateTime.iso8601", ((DateTime)target).ToString("s", CultureInfo.InvariantCulture));
+                writer.WriteXmlRpcValue("dateTime.iso8601", ((DateTime)target).ToString("yyyyMMdd'T'HH':'mm':'ss", CultureInfo.InvariantCulture));
             }
             else if (target is byte[])
             {
